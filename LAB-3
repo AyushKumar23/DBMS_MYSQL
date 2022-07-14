@@ -1,0 +1,92 @@
+create database supplier;
+use supplier;
+drop table suppliers;
+drop table catalog;
+create table suppliers
+(	sid int primary key,
+	sname varchar(20),
+    address varchar(30)
+);
+
+create table parts
+(	pid int primary key,
+	pname varchar(20),
+    color varchar(30)
+);
+
+create table catalog
+(	sid int,
+	pid int,
+    cost real,
+    primary key(sid,pid),
+    foreign key(sid) references suppliers(sid),
+    foreign key(pid) references parts(pid)
+);
+
+insert into suppliers values(10001,'Acme Widget','Bangalore'),(10002,'Johns','Kolkata'),(10003,'Vimal','Mumbai'),(10004,'Relaince','Delhi');
+
+insert into parts values(20001,'Book','Red'),(20002,'Pen','Red'),(20003,'Pencil','Green'),(20004,'Mobile','Green'),(20005,'Charger','Black');
+
+insert into catalog values(10001,20001,10),(10001,20002,10),(10001,20003,30),(10001,20004,10),(10001,20005,10),(10002,20001,10),(10002,20002,20),(10003,20003,30),(10004,20003,40);
+
+select * from suppliers;
+
+-- select * from parts;
+
+-- select * from catalog;
+
+
+-- select pname
+-- from parts
+-- where exists(select * from catalog
+-- 			where parts.pid=catalog.pid);
+
+select  distinct pname
+from parts p,catalog c
+where (p.pid=c.pid);
+
+-- 2nd------------------------------------------------------
+
+select sname,sid
+from suppliers s
+where sid IN (select sid from catalog
+				group by sid
+                having count(pid)=(select count(*) from parts));
+                
+                
+-- 3rd-------------------------------------
+
+select distinct sname 
+from suppliers s,parts p,catalog c
+where color='red'
+AND	s.sid=c.sid
+AND p.pid=c.pid;
+
+-- 4th---------------------------------------
+
+select pname
+from parts
+where pid IN (select c.pid
+				from suppliers s,catalog c
+                where s.sid=c.sid
+                AND s.sname='Acme Widget');
+                
+-- 5th--------------------------------
+
+select sid
+from catalog c
+where cost > (select avg(cost)
+		from catalog c1
+		group by pid
+              );
+
+commit;
+		
+			
+
+
+
+
+
+
+
